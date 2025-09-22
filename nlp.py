@@ -35,64 +35,48 @@ lang_map = {
 }
 
 st.title("NLP Language Detection & Translation")
+
 input_text = st.text_area("Enter your text:")
 
-if input_text:
-    detected = ft_model.predict(input_text.replace("\n", " "))  # clean newlines
-    detected_lang_code = detected[0][0].replace("__label__", "")
-    confidence = detected[1][0]
+def get_target_language():
+    target_lang_options = list(lang_map.keys())
+    selected_lang = st.selectbox("Select target language:", target_lang_options, key="target_language_select")
+    return lang_map[selected_lang] if selected_lang else None
 
-    human_readable_detected_lang = detected_lang_code
-    for key, value in lang_map.items():
-        if value.startswith(detected_lang_code):
-            human_readable_detected_lang = key
-            break
+target_language = get_target_language()
+if target_language:
+    pass
+else:
+    st.warning("Please select a target language.")
 
-    st.write(f"**Detected language:** {human_readable_detected_lang} (confidence: {confidence:.2f})")
+if st.button("Translate"):
+    if target_language and input_text:
+        detected = ft_model.predict(input_text.replace("\n", " "))  # clean newlines
+        detected_lang_code = detected[0][0].replace("__label__", "")
+        confidence = detected[1][0]
 
-    initial_target_lang_key = None
-    for key, value in lang_map.items():
-        if value.startswith(detected_lang_code):
-            initial_target_lang_key = key
-            break
-    
-    initial_index = 0
-    if initial_target_lang_key:
-        initial_index = list(lang_map.keys()).index(initial_target_lang_key)
+        human_readable_detected_lang = detected_lang_code
+        for key, value in lang_map.items():
+            if value.startswith(detected_lang_code):
+                human_readable_detected_lang = key
+                break
 
-    search_query = st.text_input("Search target language:", "")
+        st.write(f"**Detected language:** {human_readable_detected_lang} (confidence: {confidence:.2f})")
 
-    filtered_languages = [
-        lang for lang in lang_map.keys() if search_query.lower() in lang.lower()
-    ]
+        target_language_name = next((key for key, value in lang_map.items() if value == target_language), None)
+        if target_language_name and human_readable_detected_lang == target_language_name:
 
-    if initial_target_lang_key and initial_target_lang_key in filtered_languages:
-        initial_index = filtered_languages.index(initial_target_lang_key)
-    else:
-        initial_index = 0 # Reset if the detected language is not in the filtered list
+            st.info("The detected language is the same as the target language.")
 
-    selected_target_lang = st.selectbox("Select target language:", filtered_languages, index=initial_index)
-    target_lang = lang_map[selected_target_lang]
-
-    if target_lang.startswith(detected_lang_code):
-        st.info("Source and target languages are the same. No translation needed.")
-        st.text_area("Output:", input_text, height=150)
-    else:
         inputs = tokenizer(input_text, return_tensors="pt")
         translated_tokens = model.generate(
             **inputs,
-            forced_bos_token_id=tokenizer.convert_tokens_to_ids(target_lang),
+            forced_bos_token_id=tokenizer.convert_tokens_to_ids(target_language),
             max_length=400
         )
         translated_text = tokenizer.decode(translated_tokens[0], skip_special_tokens=True)
 
         st.success("Translation complete!")
         st.text_area("Translated text:", translated_text, height=150)
-else:
-    search_query = st.text_input("Search target language:", "")
-
-    filtered_languages = [
-        lang for lang in lang_map.keys() if search_query.lower() in lang.lower()
-    ]
-    selected_target_lang = st.selectbox("Select target language:", filtered_languages)
-    target_lang = lang_map[selected_target_lang]
+    else:
+        st.warning("Please select a language and enter text.")
