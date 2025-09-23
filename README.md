@@ -1,13 +1,13 @@
 # Language-Translator
-An intelligent Python-based NLP tool that detects the language of input text and translates it into English using Hugging Face Transformers and Helsinki-NLP models. Supports dynamic multilingual translation with high accuracy and minimal configuration.
+An intelligent Python-based NLP tool that detects the language of input text and translates it into a selected target language using Hugging Face Transformers and the NLLB-200 model. Supports dynamic multilingual translation with high accuracy and minimal configuration.
 
 📌 Features
 
-🌍 Automatic Language Detection using langdetect
+🌍 Automatic Language Detection using fastText
 
-🔁 Dynamic Translation Model Selection (e.g., opus-mt-fr-en, opus-mt-de-en, etc.)
+🔁 Dynamic Translation Model Selection (NLLB-200 supports over 200 languages)
 
-🌐 Accurate Translation to English using Hugging Face’s transformers library
+🌐 Accurate Translation to Selected Language using Hugging Face’s transformers library
 
 ⚡ Real-Time Translation Output for a wide range of languages
 
@@ -16,7 +16,7 @@ Python
 
 Hugging Face Transformers – for accessing powerful multilingual translation models
 
-Langdetect – for lightweight language identification
+fastText – for robust language identification
 
 ## 🚀 How to Use
 
@@ -29,16 +29,17 @@ Langdetect – for lightweight language identification
     ```bash
     pip install -r requirements.txt
     ```
-    (Note: A `requirements.txt` file will be created if it doesn't exist.)
+    (Note: You will also need to download the `lid.176.bin` model from the fastText official site: `https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.bin` and place it in the project directory.)
 3.  **Run the NLP script:**
     ```bash
-    python nlp.py
+    streamlit run nlp.py
     ```
-    Follow the prompts to enter text for language detection and translation.
+    This will open the application in your web browser. Follow the prompts to enter text for language detection and translation.
 
 ## 📋 Requirements
 
 *   Python 3.7+
+*   `streamlit` library
 *   `transformers` library
-*   `langdetect` library
+*   `fasttext` library
 *   `torch` or `tensorflow` (depending on your backend preference for Hugging Face Transformers)
