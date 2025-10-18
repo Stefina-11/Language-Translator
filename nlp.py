@@ -1,6 +1,5 @@
 import streamlit as st
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-import fasttext
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
 import os
 
 @st.cache_resource
@@ -12,14 +11,6 @@ def load_model():
 
 tokenizer, model = load_model()
 
-@st.cache_resource
-def load_fasttext_model():
-    if not os.path.exists("lid.176.bin"):
-        st.error("Download 'lid.176.bin' from fastText official site: https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.bin")
-        st.stop()
-    return fasttext.load_model("lid.176.bin")
-
-ft_model = load_fasttext_model()
 
 lang_map = {
     "English": "eng_Latn",
@@ -51,9 +42,12 @@ else:
 
 if st.button("Translate"):
     if target_language and input_text:
-        detected = ft_model.predict(input_text.replace("\n", " "))  # clean newlines
-        detected_lang_code = detected[0][0].replace("__label__", "")
-        confidence = detected[1][0]
+        # Language detection using transformers pipeline
+        # Using a smaller, dedicated language identification model
+        lang_id_pipeline = pipeline("text-classification", model="papluca/xlm-roberta-base-language-detection")
+        lang_id_result = lang_id_pipeline(input_text)[0]
+        detected_lang_code = lang_id_result['label'].split('_')[0].lower() # e.g., 'en' from 'en_XX'
+        confidence = lang_id_result['score']
 
         human_readable_detected_lang = detected_lang_code
         for key, value in lang_map.items():

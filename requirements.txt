@@ -1,4 +1,3 @@
 streamlit
 transformers
-fasttext
-torch # or tensorflow, depending on user preference
+torch
